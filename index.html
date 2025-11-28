@@ -8,7 +8,7 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 		<style>
 			:root {
-				--bg: #0b1120;
+				--bg: #020617;
 				--card: #020617;
 				--border: #1f2937;
 				--text: #e5e7eb;
@@ -27,7 +27,7 @@
 				padding: 16px;
 				font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
 					sans-serif;
-				background: #020617;
+				background: var(--bg);
 				color: var(--text);
 				display: flex;
 				justify-content: center;
@@ -35,7 +35,7 @@
 
 			.app {
 				width: 100%;
-				max-width: 1080px;
+				max-width: 1120px;
 			}
 
 			h1 {
@@ -63,11 +63,23 @@
 				padding: 12px 14px;
 			}
 
+			.header-grid {
+				display: grid;
+				grid-template-columns: repeat(4, minmax(0, 1fr));
+				gap: 10px;
+				margin-top: 8px;
+			}
+
+			.field-group {
+				display: flex;
+				flex-direction: column;
+				gap: 4px;
+			}
+
 			label {
 				font-size: 0.8rem;
 				color: var(--muted);
 				display: block;
-				margin-bottom: 4px;
 			}
 
 			input[type="text"],
@@ -270,8 +282,17 @@
 				width: 60px;
 			}
 
-			@media (max-width: 860px) {
+			@media (max-width: 960px) {
 				.row {
+					grid-template-columns: minmax(0, 1fr);
+				}
+				.header-grid {
+					grid-template-columns: repeat(2, minmax(0, 1fr));
+				}
+			}
+
+			@media (max-width: 640px) {
+				.header-grid {
 					grid-template-columns: minmax(0, 1fr);
 				}
 			}
@@ -282,41 +303,60 @@
 			<div>
 				<h1>Study Plan & GPA Tracker</h1>
 				<p>
-					Input matkul per semester, komponen nilai (tugas/UTS/UAS/project),
-					nilai akhir → grade → GPA otomatis. Data disimpan di browser.
+					Semester 1–3 sudah keisi. Pilih streaming/minor buat generate Semester
+					4–5. Nilai & GPA otomatis, data disimpan di browser.
 				</p>
 			</div>
 
 			<div class="row">
 				<div class="card">
-					<div class="flex">
-						<div class="grow flex-col">
-							<label for="track">Track / Streaming</label>
-							<select id="track">
-								<option value="">Tidak ditentukan</option>
-								<option>Software Engineering</option>
-								<option>Data Science</option>
-								<option>Intelligent System</option>
-								<option>Internet of Things</option>
-								<option>Network Technology</option>
-								<option>Network Security</option>
-								<option>Game Technology</option>
-								<option>Mobile Technology</option>
-							</select>
+					<div class="header-grid">
+						<div class="field-group">
+							<label for="track">Track (bebas)</label>
+							<input id="track" type="text" placeholder="Misal: CS Malang" />
 						</div>
-						<div style="width: 170px" class="flex-col">
-							<label for="entryYear">Angkatan / Katalog</label>
+						<div class="field-group">
+							<label for="entryYear">Angkatan</label>
 							<input
 								id="entryYear"
 								type="text"
-								placeholder="mis. 2025 / BINUSIAN 2029"
+								placeholder="2024 / BINUSIAN 2028"
 							/>
 						</div>
+						<div class="field-group">
+							<label for="programPath">Streaming / Minor</label>
+							<select id="programPath">
+								<option value="">— Pilih streaming/minor —</option>
+								<optgroup label="Streaming (S4–S5)">
+									<option value="stream-dct">
+										Digital Creative Technology
+									</option>
+									<option value="stream-immersive">Immersive Technology</option>
+									<option value="stream-iot">Internet of Things</option>
+									<option value="stream-intelligent">Intelligent System</option>
+									<option value="stream-database">Database Technology</option>
+									<option value="stream-se">Software Engineering</option>
+								</optgroup>
+								<optgroup label="Minor (contoh)">
+									<option value="minor-data-analytics">
+										Minor: Data Analytics
+									</option>
+									<option value="minor-digital-technopreneur">
+										Minor: Digital Technopreneur
+									</option>
+								</optgroup>
+							</select>
+						</div>
+						<div class="field-group">
+							<label>&nbsp;</label>
+							<button type="button" id="applyPathBtn" class="btn">
+								Generate S4–S5
+							</button>
+						</div>
 					</div>
-
 					<div class="helper">
-						Semester 1–3 sudah diisi otomatis dari portal/Excel (kode, SKS,
-						komponen, bobot). Nilai kamu isi sendiri.
+						Matkul S1–S3 sudah diisi (kode, nama, SKS, komponen+bobot) dari
+						portal. Nilai tiap komponen kamu isi sendiri.
 					</div>
 				</div>
 
@@ -335,7 +375,7 @@
 						<div class="kpi">
 							<div class="kpi-label">GPA kumulatif</div>
 							<div id="overallGpa" class="kpi-value">0.00</div>
-							<div class="kpi-sub">hanya matkul yang punya grade</div>
+							<div class="kpi-sub">hanya matkul yang sudah ada grade</div>
 						</div>
 						<div class="kpi">
 							<div class="kpi-label">Total SKS terhitung</div>
@@ -389,9 +429,7 @@
 								<th>Aksi</th>
 							</tr>
 						</thead>
-						<tbody id="courseTableBody">
-							<!-- rows via JS -->
-						</tbody>
+						<tbody id="courseTableBody"></tbody>
 					</table>
 				</div>
 
@@ -404,14 +442,19 @@
 					"
 				>
 					<div class="small">
-						<span>SKS semester: <strong id="semCredits">0</strong></span>
-						&nbsp;|&nbsp;
-						<span>GPS semester: <strong id="semGpa">0.00</strong></span>
+						SKS semester: <strong id="semCredits">0</strong> &nbsp;|&nbsp; GPS
+						semester: <strong id="semGpa">0.00</strong>
 					</div>
 					<div class="flex" style="gap: 4px">
-						<button id="resetAllBtn" class="btn btn-danger">
-							Reset Semua Data
-						</button>
+						<button id="exportCsvBtn" class="btn">Export CSV</button>
+						<button id="importCsvBtn" class="btn">Import CSV</button>
+						<button id="resetAllBtn" class="btn btn-danger">Reset Semua</button>
+						<input
+							type="file"
+							id="csvFileInput"
+							accept=".csv,text/csv"
+							style="display: none"
+						/>
 					</div>
 				</div>
 
@@ -453,11 +496,27 @@
 				</div>
 			</div>
 		</div>
+
 		<script>
 			(function () {
-				const STORAGE_KEY = "study-plan-simple-v3";
+				const STORAGE_KEY = "study-plan-csv-v1";
 				const semestersCount = 8;
 
+				// --- helper: parse "2/1" jadi 3
+				function parseScu(s) {
+					if (typeof s === "number") return s;
+					if (!s) return null;
+					const str = String(s).trim();
+					if (str.includes("/")) {
+						const parts = str.split("/").map((x) => parseFloat(x.trim()));
+						if (!isNaN(parts[0]) && !isNaN(parts[1]))
+							return parts[0] + parts[1];
+					}
+					const n = parseFloat(str);
+					return isNaN(n) ? null : n;
+				}
+
+				// --- default plan S1–S3 (dari portal), S4–S8 kosong
 				const defaultPlan = {
 					1: [
 						{
@@ -689,14 +748,259 @@
 					8: [],
 				};
 
+				// base core S4–S5 sama untuk semua path (simplified)
+				const baseSem4 = [
+					{
+						code: "COMP6712004",
+						name: "Research Methodology in Computer Science",
+						scu: 2,
+					},
+					{ code: "SCIE6068004", name: "Computational Biology", scu: "2/1" },
+					{ code: "COMP6855004", name: "Software Engineering", scu: 4 },
+					{
+						code: "COMP6955004",
+						name: "Database Design (General Course)",
+						scu: 2,
+					},
+				];
+
+				const baseSem5 = [
+					{ code: "COMP6390004", name: "Compilation Techniques", scu: 4 },
+					{ code: "COMP6713004", name: "Operating System", scu: 2 },
+					{ code: "ENPR6316002", name: "Venture Creation", scu: 2 },
+				];
+
+				// streaming/minor config (S4–S5)
+				const programPaths = {
+					"stream-dct": {
+						label: "Streaming – Digital Creative Technology",
+						4: [
+							{ code: "COMP6679004", name: "Web Programming", scu: 4 },
+							{
+								code: "COSC6109004",
+								name: "Popular Programming Technology",
+								scu: 4,
+							},
+							{ code: "COSC6001004", name: "User Experience", scu: 2 },
+						],
+						5: [
+							{
+								code: "COMP6678004",
+								name: "Big Data Analytics for Business",
+								scu: 4,
+							},
+							{
+								code: "MOBI6063004",
+								name: "Mobile Application Programming",
+								scu: 4,
+							},
+							{
+								code: "COSC6005004",
+								name: "Agile Software Development",
+								scu: 2,
+							},
+						],
+					},
+					"stream-immersive": {
+						label: "Streaming – Immersive Technology",
+						4: [
+							{
+								code: "COSC6002004",
+								name: "UX for Digital Immersive Technology",
+								scu: 2,
+							},
+							{
+								code: "COSC6003004",
+								name: "Multimedia and 3D Modelling",
+								scu: "2/2",
+							},
+							{ code: "COSC6004004", name: "3D Web Programming", scu: "2/2" },
+						],
+						5: [
+							{
+								code: "COSC6006004",
+								name: "Augmented Reality Programming",
+								scu: "2/2",
+							},
+							{
+								code: "COSC6007004",
+								name: "Virtual Reality Programming",
+								scu: "2/2",
+							},
+							{
+								code: "COSC6008004",
+								name: "Immersive Technology Capstone",
+								scu: 2,
+							},
+						],
+					},
+					"stream-iot": {
+						label: "Streaming – Internet of Things",
+						4: [
+							{ code: "COMP6849031", name: "Embedded System", scu: "2/2" },
+							{
+								code: "COMP6850031",
+								name: "Multimedia & Mixed Reality",
+								scu: "2/1",
+							},
+							{ code: "MOBI6072031", name: "Mobile Programming", scu: "2/1" },
+							{ code: "COMP6655031", name: "Cyber Security in IoT", scu: 2 },
+						],
+						5: [
+							{
+								code: "COMP6757031",
+								name: "Computer Vision in IoT",
+								scu: "2/2",
+							},
+							{
+								code: "COMP6882031",
+								name: "IoT Development and Architecture",
+								scu: "2/2",
+							},
+							{ code: "ELEC-IOT-S5", name: "Elective (IoT Streaming)", scu: 2 },
+						],
+					},
+					"stream-intelligent": {
+						label: "Streaming – Intelligent System",
+						4: [
+							{
+								code: "COMP6885001",
+								name: "Natural Language Processing",
+								scu: "2/2",
+							},
+							{ code: "COMP6577001", name: "Machine Learning", scu: 4 },
+							{ code: "COMP7116001", name: "Computer Vision", scu: "2/2" },
+						],
+						5: [
+							{ code: "COMP6822001", name: "Speech Recognition", scu: "2/2" },
+							{ code: "COMP6826001", name: "Deep Learning", scu: "2/2" },
+							{
+								code: "ELEC-INT-S5",
+								name: "Elective (Intelligent System)",
+								scu: 2,
+							},
+						],
+					},
+					"stream-database": {
+						label: "Streaming – Database Technology",
+						4: [
+							{ code: "COSC6097001", name: "Data Engineering", scu: "2/1" },
+							{ code: "COMP6579001", name: "Big Data Processing", scu: "2/2" },
+							{ code: "COSC6098001", name: "Data Visualization", scu: 2 },
+							{ code: "COSC6099001", name: "Data Analytics", scu: "2/1" },
+						],
+						5: [
+							{
+								code: "COMP6590001",
+								name: "Geographical Information System",
+								scu: "2/2",
+							},
+							{ code: "COMP6140001", name: "Data Mining", scu: "2/2" },
+							{ code: "ELEC-DB-S5", name: "Elective (Database Tech)", scu: 2 },
+						],
+					},
+					"stream-se": {
+						label: "Streaming – Software Engineering",
+						4: [
+							{ code: "COSC6092001", name: "Code Reengineering", scu: "2/2" },
+							{
+								code: "COSC6093001",
+								name: "Software Architecture",
+								scu: "2/2",
+							},
+							{
+								code: "COSC6094001",
+								name: "Mobile Hybrid Solution",
+								scu: "2/2",
+							},
+						],
+						5: [
+							{
+								code: "COSC6102001",
+								name: "Software Metrics & QA",
+								scu: "2/2",
+							},
+							{
+								code: "COSC6103001",
+								name: "Mobile Technology Solution",
+								scu: "2/2",
+							},
+							{ code: "ELEC-SE-S5", name: "Elective (Software Eng.)", scu: 2 },
+						],
+					},
+
+					// minor contoh
+					"minor-data-analytics": {
+						label: "Minor – Data Analytics (Malang)",
+						4: [
+							{
+								code: "INFS6066052",
+								name: "Introduction to Data Analytics",
+								scu: 2,
+							},
+							{
+								code: "INFS6067052",
+								name: "Data Management & Descriptive Analytics",
+								scu: 4,
+							},
+							{
+								code: "ISYE6371054",
+								name: "Statistics for Decision Making",
+								scu: 4,
+							},
+						],
+						5: [
+							{
+								code: "COSC6183051",
+								name: "Predictive Analytics for Business Data",
+								scu: 4,
+							},
+							{
+								code: "ISYE6372054",
+								name: "Prescriptive Analytics & Optimization",
+								scu: 4,
+							},
+							{
+								code: "BUSS6277055",
+								name: "Digitalization of Markets & Consumption",
+								scu: 2,
+							},
+						],
+					},
+					"minor-digital-technopreneur": {
+						label: "Minor – Digital Technopreneur (Malang)",
+						4: [
+							{
+								code: "ENTR6528002",
+								name: "The Entrepreneurial Innovator",
+								scu: 4,
+							},
+							{ code: "ENPR6370002", name: "Market Intelligence", scu: 4 },
+							{ code: "COMP6687004", name: "User Experience Design", scu: 4 },
+						],
+						5: [
+							{
+								code: "COSC6164004",
+								name: "Web Programming for Business",
+								scu: 4,
+							},
+							{
+								code: "COSC6165004",
+								name: "Data Analytics for Business",
+								scu: 4,
+							},
+						],
+					},
+				};
+
 				const gradePoints = {
 					A: 4.0,
-					"A-": 3.67,
-					"B+": 3.33,
+					"A-": 3.7,
+					"B+": 3.3,
 					B: 3.0,
-					"B-": 2.5,
-					"C+": 2,
-					C: 1,
+					"B-": 2.7,
+					"C+": 2.3,
+					C: 2.0,
 					D: 1.0,
 					E: 0.0,
 				};
@@ -708,9 +1012,9 @@
 					if (score >= 80) return "B+";
 					if (score >= 75) return "B";
 					if (score >= 70) return "B-";
-					if (score >= 65) return "C+";
-					if (score >= 50) return "C";
-					if (score >= 0) return "D";
+					if (score >= 75) return "C+";
+					if (score >= 65) return "C";
+					if (score >= 50) return "D";
 					return "E";
 				}
 
@@ -721,19 +1025,17 @@
 					nextCourseId: 1,
 					nextComponentId: 1,
 					semesters: {},
+					programPathKey: "",
 				};
 
-				for (let s = 1; s <= semestersCount; s++) {
-					state.semesters[s] = [];
-				}
-
+				for (let s = 1; s <= semestersCount; s++) state.semesters[s] = [];
 				let currentDetailCourseId = null;
 
 				function saveState() {
 					try {
 						localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
 					} catch (e) {
-						console.warn("Gagal simpan state", e);
+						console.warn("Gagal save", e);
 					}
 				}
 
@@ -741,19 +1043,21 @@
 					try {
 						const raw = localStorage.getItem(STORAGE_KEY);
 						if (!raw) {
+							// init dari defaultPlan
 							state.track = "";
 							state.entryYear = "";
 							state.activeSemester = 1;
 							state.nextCourseId = 1;
 							state.nextComponentId = 1;
+							state.programPathKey = "";
 							state.semesters = {};
 							for (let s = 1; s <= semestersCount; s++) {
 								const key = String(s);
 								const courses = defaultPlan[key] || [];
 								state.semesters[s] = courses.map((c) => {
-									const courseId = state.nextCourseId++;
+									const cid = state.nextCourseId++;
 									return {
-										id: courseId,
+										id: cid,
 										code: c.code || "",
 										name: c.name || "",
 										sks: c.sks != null ? c.sks : null,
@@ -770,19 +1074,17 @@
 							}
 							return;
 						}
-
 						const data = JSON.parse(raw);
 						if (!data || typeof data !== "object") return;
-
 						state.track = data.track || "";
 						state.entryYear = data.entryYear || "";
 						state.activeSemester = data.activeSemester || 1;
 						state.nextCourseId = data.nextCourseId || 1;
 						state.nextComponentId = data.nextComponentId || 1;
+						state.programPathKey = data.programPathKey || "";
 						state.semesters = {};
 						for (let s = 1; s <= semestersCount; s++) {
-							const arr =
-								data.semesters && data.semesters[s] ? data.semesters[s] : [];
+							const arr = (data.semesters && data.semesters[s]) || [];
 							state.semesters[s] = arr.map((c) => ({
 								id: c.id,
 								code: c.code || "",
@@ -799,7 +1101,7 @@
 							}));
 						}
 					} catch (e) {
-						console.warn("Gagal load state", e);
+						console.warn("Gagal load", e);
 					}
 				}
 
@@ -811,20 +1113,79 @@
 					return null;
 				}
 
+				function createCourse(code, name, scu) {
+					const sks = parseScu(scu);
+					const course = {
+						id: state.nextCourseId++,
+						code: code || "",
+						name: name || "",
+						sks: sks,
+						finalScore: null,
+						grade: "",
+						components: [
+							{
+								id: state.nextComponentId++,
+								name: "FINAL",
+								weight: 100,
+								score: null,
+							},
+						],
+					};
+					return course;
+				}
+
+				function applyProgramPath(key) {
+					const cfg = programPaths[key];
+					if (!cfg) return;
+					const has4 = state.semesters[4].length > 0;
+					const has5 = state.semesters[5].length > 0;
+					if (
+						(has4 || has5) &&
+						!confirm(
+							"Semester 4 & 5 akan di-overwrite oleh pilihan streaming/minor. Lanjut?"
+						)
+					) {
+						const select = document.getElementById("programPath");
+						if (select) select.value = state.programPathKey || "";
+						return;
+					}
+
+					state.semesters[4] = [];
+					state.semesters[5] = [];
+
+					baseSem4.forEach((c) =>
+						state.semesters[4].push(createCourse(c.code, c.name, c.scu))
+					);
+					baseSem5.forEach((c) =>
+						state.semesters[5].push(createCourse(c.code, c.name, c.scu))
+					);
+					(cfg[4] || []).forEach((c) =>
+						state.semesters[4].push(createCourse(c.code, c.name, c.scu))
+					);
+					(cfg[5] || []).forEach((c) =>
+						state.semesters[5].push(createCourse(c.code, c.name, c.scu))
+					);
+
+					state.programPathKey = key;
+					saveState();
+					currentDetailCourseId = null;
+					render();
+				}
+
 				function recomputeAllCourses() {
 					for (let s = 1; s <= semestersCount; s++) {
 						for (const course of state.semesters[s]) {
 							const comps = course.components || [];
-							let totalWeight = 0;
-							let total = 0;
+							let totalW = 0;
+							let totalScore = 0;
 							for (const comp of comps) {
 								const w = parseFloat(comp.weight);
 								const v = parseFloat(comp.score);
 								if (isNaN(w) || isNaN(v)) continue;
-								totalWeight += w;
-								total += (w / 100) * v;
+								totalW += w;
+								totalScore += (w / 100) * v;
 							}
-							const score = totalWeight > 0 ? total : null;
+							const score = totalW > 0 ? totalScore : null;
 							course.finalScore = score;
 							course.grade = score != null ? numericToGrade(score) : "";
 						}
@@ -917,11 +1278,10 @@
 
 							const tdFinal = document.createElement("td");
 							const spanFinal = document.createElement("span");
-							if (course.finalScore != null && !isNaN(course.finalScore)) {
-								spanFinal.textContent = course.finalScore.toFixed(2);
-							} else {
-								spanFinal.textContent = "-";
-							}
+							spanFinal.textContent =
+								course.finalScore != null && !isNaN(course.finalScore)
+									? course.finalScore.toFixed(2)
+									: "-";
 							tdFinal.appendChild(spanFinal);
 							tr.appendChild(tdFinal);
 
@@ -1005,7 +1365,7 @@
 					panel.style.display = "block";
 					title.textContent =
 						(course.code ? course.code + " – " : "") +
-						(course.name || "Matkul tanpa nama");
+						(course.name || "Matkul");
 					sub.textContent =
 						"Komponen nilai untuk matkul ini (tugas, quiz, UTS, UAS, project, dll).";
 
@@ -1113,14 +1473,13 @@
 					course.grade = finalScore != null ? numericToGrade(finalScore) : "";
 					saveState();
 
-					const grade = course.grade || "-";
 					summary.textContent =
 						"Total bobot: " +
 						totalWeight.toFixed(1) +
 						"% • Nilai akhir: " +
 						(finalScore != null ? finalScore.toFixed(2) : "0.00") +
 						" (grade: " +
-						grade +
+						(course.grade || "-") +
 						")";
 
 					renderCoursesTable();
@@ -1167,6 +1526,9 @@
 						sub.textContent =
 							"Isi daftar matkul reguler dan komponen nilainya.";
 					}
+
+					const select = document.getElementById("programPath");
+					if (select) select.value = state.programPathKey || "";
 				}
 
 				function render() {
@@ -1199,7 +1561,6 @@
 					const course = findCourseById(currentDetailCourseId);
 					if (!course) return;
 					if (!course.components) course.components = [];
-
 					course.components.push({
 						id: state.nextComponentId++,
 						name: "",
@@ -1213,7 +1574,7 @@
 				function resetAll() {
 					if (
 						!confirm(
-							"Hapus semua matkul, komponen, dan setting yang tersimpan di browser?"
+							"Hapus semua matkul, komponen, setting, dan pilihan streaming/minor yang tersimpan di browser?"
 						)
 					)
 						return;
@@ -1225,12 +1586,228 @@
 						nextCourseId: 1,
 						nextComponentId: 1,
 						semesters: {},
+						programPathKey: "",
 					};
-					for (let s = 1; s <= semestersCount; s++) {
-						state.semesters[s] = [];
-					}
+					for (let s = 1; s <= semestersCount; s++) state.semesters[s] = [];
 					currentDetailCourseId = null;
 					loadState();
+					render();
+				}
+
+				// -------- CSV export/import --------
+				function escapeCsv(value) {
+					if (value == null) return '""';
+					const s = String(value);
+					return '"' + s.replace(/"/g, '""') + '"';
+				}
+
+				// export: satu baris per komponen
+				// header: type,semester,code,name,sks,componentName,componentWeight,componentScore
+				function exportCsv() {
+					const lines = [];
+					lines.push(
+						"type,semester,code,name,sks,componentName,componentWeight,componentScore"
+					);
+
+					// meta rows
+					lines.push(
+						[
+							escapeCsv("meta"),
+							escapeCsv(""),
+							escapeCsv("track"),
+							escapeCsv(state.track || ""),
+							escapeCsv(""),
+							escapeCsv(""),
+							escapeCsv(""),
+							escapeCsv(""),
+						].join(",")
+					);
+					lines.push(
+						[
+							escapeCsv("meta"),
+							escapeCsv(""),
+							escapeCsv("entryYear"),
+							escapeCsv(state.entryYear || ""),
+							escapeCsv(""),
+							escapeCsv(""),
+							escapeCsv(""),
+							escapeCsv(""),
+						].join(",")
+					);
+					lines.push(
+						[
+							escapeCsv("meta"),
+							escapeCsv(""),
+							escapeCsv("programPathKey"),
+							escapeCsv(state.programPathKey || ""),
+							escapeCsv(""),
+							escapeCsv(""),
+							escapeCsv(""),
+							escapeCsv(""),
+						].join(",")
+					);
+
+					// course/component rows
+					for (let s = 1; s <= semestersCount; s++) {
+						const courses = state.semesters[s] || [];
+						for (const course of courses) {
+							const comps =
+								course.components && course.components.length
+									? course.components
+									: [{ name: "", weight: "", score: "" }];
+							for (const comp of comps) {
+								lines.push(
+									[
+										escapeCsv("component"),
+										escapeCsv(s),
+										escapeCsv(course.code || ""),
+										escapeCsv(course.name || ""),
+										escapeCsv(course.sks != null ? course.sks : ""),
+										escapeCsv(comp.name || ""),
+										escapeCsv(comp.weight != null ? comp.weight : ""),
+										escapeCsv(comp.score != null ? comp.score : ""),
+									].join(",")
+								);
+							}
+						}
+					}
+
+					const blob = new Blob([lines.join("\n")], {
+						type: "text/csv;charset=utf-8",
+					});
+					const url = URL.createObjectURL(blob);
+					const a = document.createElement("a");
+					a.href = url;
+					a.download = "study-plan.csv";
+					document.body.appendChild(a);
+					a.click();
+					document.body.removeChild(a);
+					URL.revokeObjectURL(url);
+				}
+
+				// simple CSV parser (quotes + comma aware)
+				function parseCsv(text) {
+					const rows = [];
+					let cur = [];
+					let field = "";
+					let inQuotes = false;
+
+					for (let i = 0; i < text.length; i++) {
+						const ch = text[i];
+
+						if (inQuotes) {
+							if (ch === '"') {
+								if (i + 1 < text.length && text[i + 1] === '"') {
+									field += '"';
+									i++;
+								} else {
+									inQuotes = false;
+								}
+							} else {
+								field += ch;
+							}
+						} else {
+							if (ch === '"') {
+								inQuotes = true;
+							} else if (ch === ",") {
+								cur.push(field);
+								field = "";
+							} else if (ch === "\r") {
+								// ignore
+							} else if (ch === "\n") {
+								cur.push(field);
+								rows.push(cur);
+								cur = [];
+								field = "";
+							} else {
+								field += ch;
+							}
+						}
+					}
+					if (field.length > 0 || cur.length > 0) {
+						cur.push(field);
+						rows.push(cur);
+					}
+					return rows;
+				}
+
+				function importCsvText(text) {
+					const rows = parseCsv(text);
+					if (!rows.length) return;
+
+					const header = rows[0];
+					if (!header || header[0] !== "type") {
+						alert("Format CSV tidak dikenali.");
+						return;
+					}
+
+					const newState = {
+						track: "",
+						entryYear: "",
+						activeSemester: 1,
+						nextCourseId: 1,
+						nextComponentId: 1,
+						semesters: {},
+						programPathKey: "",
+					};
+					for (let s = 1; s <= semestersCount; s++) newState.semesters[s] = [];
+					const courseMap = {}; // key: sem|code|name -> course
+
+					for (let i = 1; i < rows.length; i++) {
+						const row = rows[i];
+						if (!row || row.length === 0) continue;
+						const type = (row[0] || "").trim();
+
+						if (type === "meta") {
+							const key = (row[2] || "").trim();
+							const val = row[3] || "";
+							if (key === "track") newState.track = val;
+							if (key === "entryYear") newState.entryYear = val;
+							if (key === "programPathKey") newState.programPathKey = val;
+							continue;
+						}
+
+						if (type !== "component") continue;
+						const semStr = (row[1] || "").trim();
+						const sem = parseInt(semStr, 10);
+						if (!(sem >= 1 && sem <= semestersCount)) continue;
+
+						const code = row[2] || "";
+						const name = row[3] || "";
+						const sksVal = row[4] || "";
+						const compName = row[5] || "";
+						const compWeightVal = row[6] || "";
+						const compScoreVal = row[7] || "";
+
+						const keyCourse = sem + "|" + code + "|" + name;
+						let course = courseMap[keyCourse];
+						if (!course) {
+							course = {
+								id: newState.nextCourseId++,
+								code: code,
+								name: name,
+								sks: sksVal !== "" ? parseFloat(sksVal) : null,
+								finalScore: null,
+								grade: "",
+								components: [],
+							};
+							courseMap[keyCourse] = course;
+							newState.semesters[sem].push(course);
+						}
+
+						if (compName || compWeightVal || compScoreVal) {
+							course.components.push({
+								id: newState.nextComponentId++,
+								name: compName,
+								weight: compWeightVal !== "" ? parseFloat(compWeightVal) : null,
+								score: compScoreVal !== "" ? parseFloat(compScoreVal) : null,
+							});
+						}
+					}
+
+					state = newState;
+					currentDetailCourseId = null;
+					saveState();
 					render();
 				}
 
@@ -1248,6 +1825,15 @@
 						});
 
 					document
+						.getElementById("applyPathBtn")
+						.addEventListener("click", () => {
+							const select = document.getElementById("programPath");
+							const val = select.value;
+							if (!val) return;
+							applyProgramPath(val);
+						});
+
+					document
 						.getElementById("addCourseBtn")
 						.addEventListener("click", () => {
 							addCourse(state.activeSemester);
@@ -1262,6 +1848,35 @@
 					document
 						.getElementById("resetAllBtn")
 						.addEventListener("click", resetAll);
+
+					document
+						.getElementById("exportCsvBtn")
+						.addEventListener("click", exportCsv);
+
+					const fileInput = document.getElementById("csvFileInput");
+					document
+						.getElementById("importCsvBtn")
+						.addEventListener("click", () => {
+							fileInput.click();
+						});
+					fileInput.addEventListener("change", (e) => {
+						const file = e.target.files[0];
+						if (!file) return;
+						const reader = new FileReader();
+						reader.onload = (ev) => {
+							if (
+								!confirm(
+									"Data dari CSV akan menggantikan data sekarang. Lanjut?"
+								)
+							) {
+								fileInput.value = "";
+								return;
+							}
+							importCsvText(ev.target.result);
+							fileInput.value = "";
+						};
+						reader.readAsText(file);
+					});
 				}
 
 				loadState();
