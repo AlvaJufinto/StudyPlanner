@@ -1,0 +1,1273 @@
+<!-- @format -->
+
+<!DOCTYPE html>
+<html lang="id">
+	<head>
+		<meta charset="UTF-8" />
+		<title>Study Plan & GPA Tracker</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<style>
+			:root {
+				--bg: #0b1120;
+				--card: #020617;
+				--border: #1f2937;
+				--text: #e5e7eb;
+				--muted: #9ca3af;
+				--accent: #22c55e;
+				--danger: #f97373;
+				--radius: 10px;
+			}
+
+			* {
+				box-sizing: border-box;
+			}
+
+			body {
+				margin: 0;
+				padding: 16px;
+				font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+					sans-serif;
+				background: #020617;
+				color: var(--text);
+				display: flex;
+				justify-content: center;
+			}
+
+			.app {
+				width: 100%;
+				max-width: 1080px;
+			}
+
+			h1 {
+				font-size: 1.4rem;
+				margin: 0 0 4px;
+			}
+
+			p {
+				margin: 0;
+				color: var(--muted);
+				font-size: 0.9rem;
+			}
+
+			.row {
+				display: grid;
+				grid-template-columns: minmax(0, 2fr) minmax(0, 1.3fr);
+				gap: 12px;
+				margin-top: 16px;
+			}
+
+			.card {
+				background: var(--card);
+				border-radius: var(--radius);
+				border: 1px solid var(--border);
+				padding: 12px 14px;
+			}
+
+			label {
+				font-size: 0.8rem;
+				color: var(--muted);
+				display: block;
+				margin-bottom: 4px;
+			}
+
+			input[type="text"],
+			input[type="number"],
+			select {
+				width: 100%;
+				padding: 6px 10px;
+				border-radius: 6px;
+				border: 1px solid var(--border);
+				background: #020617;
+				color: var(--text);
+				font-size: 0.85rem;
+				outline: none;
+			}
+
+			input:focus,
+			select:focus {
+				border-color: var(--accent);
+			}
+
+			.flex {
+				display: flex;
+				gap: 8px;
+				flex-wrap: wrap;
+				align-items: center;
+			}
+
+			.flex-col {
+				display: flex;
+				flex-direction: column;
+				gap: 4px;
+			}
+
+			.grow {
+				flex: 1;
+				min-width: 0;
+			}
+
+			.badge {
+				display: inline-flex;
+				align-items: center;
+				gap: 6px;
+				font-size: 0.75rem;
+				color: var(--muted);
+				border-radius: 999px;
+				border: 1px solid var(--border);
+				padding: 2px 8px;
+			}
+
+			.dot {
+				width: 6px;
+				height: 6px;
+				border-radius: 999px;
+				background: var(--accent);
+			}
+
+			.kpi-grid {
+				display: grid;
+				grid-template-columns: repeat(2, minmax(0, 1fr));
+				gap: 8px;
+				margin-top: 6px;
+			}
+
+			.kpi {
+				border-radius: 8px;
+				border: 1px solid var(--border);
+				padding: 8px 10px;
+				background: #020617;
+			}
+
+			.kpi-label {
+				font-size: 0.75rem;
+				color: var(--muted);
+				text-transform: uppercase;
+			}
+
+			.kpi-value {
+				font-size: 1.1rem;
+				font-weight: 600;
+			}
+
+			.kpi-sub {
+				font-size: 0.75rem;
+				color: var(--muted);
+			}
+
+			.semester-tabs {
+				display: flex;
+				flex-wrap: wrap;
+				gap: 6px;
+				margin-bottom: 8px;
+			}
+
+			.tab {
+				padding: 5px 10px;
+				border-radius: 999px;
+				border: 1px solid var(--border);
+				background: #020617;
+				color: var(--muted);
+				font-size: 0.8rem;
+				cursor: pointer;
+			}
+
+			.tab.active {
+				background: var(--accent);
+				color: #052e16;
+				border-color: var(--accent);
+				font-weight: 600;
+			}
+
+			.tab:hover {
+				border-color: var(--accent);
+			}
+
+			table {
+				width: 100%;
+				border-collapse: collapse;
+				font-size: 0.8rem;
+			}
+
+			th,
+			td {
+				padding: 6px 8px;
+				border-bottom: 1px solid var(--border);
+				text-align: left;
+			}
+
+			th {
+				color: var(--muted);
+				font-weight: 500;
+				font-size: 0.75rem;
+			}
+
+			tbody tr:last-child td {
+				border-bottom: none;
+			}
+
+			.btn {
+				border-radius: 6px;
+				border: 1px solid var(--border);
+				background: #020617;
+				color: var(--text);
+				font-size: 0.78rem;
+				padding: 4px 8px;
+				cursor: pointer;
+			}
+
+			.btn-primary {
+				border-color: var(--accent);
+				background: var(--accent);
+				color: #052e16;
+				font-weight: 600;
+			}
+
+			.btn-danger {
+				border-color: var(--danger);
+				color: var(--danger);
+			}
+
+			.btn + .btn {
+				margin-left: 4px;
+			}
+
+			.helper {
+				margin-top: 6px;
+				font-size: 0.75rem;
+				color: var(--muted);
+			}
+
+			.components-panel {
+				margin-top: 12px;
+				border-radius: var(--radius);
+				border: 1px solid var(--border);
+				padding: 10px;
+				background: #020617;
+			}
+
+			.components-header {
+				display: flex;
+				justify-content: space-between;
+				align-items: center;
+				margin-bottom: 4px;
+				gap: 8px;
+			}
+
+			.components-title {
+				font-size: 0.9rem;
+				font-weight: 600;
+			}
+
+			.small {
+				font-size: 0.75rem;
+				color: var(--muted);
+			}
+
+			.w-40 {
+				width: 40px;
+			}
+			.w-60 {
+				width: 60px;
+			}
+
+			@media (max-width: 860px) {
+				.row {
+					grid-template-columns: minmax(0, 1fr);
+				}
+			}
+		</style>
+	</head>
+	<body>
+		<div class="app">
+			<div>
+				<h1>Study Plan & GPA Tracker</h1>
+				<p>
+					Input matkul per semester, komponen nilai (tugas/UTS/UAS/project),
+					nilai akhir → grade → GPA otomatis. Data disimpan di browser.
+				</p>
+			</div>
+
+			<div class="row">
+				<div class="card">
+					<div class="flex">
+						<div class="grow flex-col">
+							<label for="track">Track / Streaming</label>
+							<select id="track">
+								<option value="">Tidak ditentukan</option>
+								<option>Software Engineering</option>
+								<option>Data Science</option>
+								<option>Intelligent System</option>
+								<option>Internet of Things</option>
+								<option>Network Technology</option>
+								<option>Network Security</option>
+								<option>Game Technology</option>
+								<option>Mobile Technology</option>
+							</select>
+						</div>
+						<div style="width: 170px" class="flex-col">
+							<label for="entryYear">Angkatan / Katalog</label>
+							<input
+								id="entryYear"
+								type="text"
+								placeholder="mis. 2025 / BINUSIAN 2029"
+							/>
+						</div>
+					</div>
+
+					<div class="helper">
+						Semester 1–3 sudah diisi otomatis dari portal/Excel (kode, SKS,
+						komponen, bobot). Nilai kamu isi sendiri.
+					</div>
+				</div>
+
+				<div class="card">
+					<div
+						class="flex"
+						style="justify-content: space-between; align-items: center"
+					>
+						<div class="badge">
+							<span class="dot"></span>
+							Ringkasan GPA
+						</div>
+						<span class="small">Auto-save ke <code>localStorage</code></span>
+					</div>
+					<div class="kpi-grid">
+						<div class="kpi">
+							<div class="kpi-label">GPA kumulatif</div>
+							<div id="overallGpa" class="kpi-value">0.00</div>
+							<div class="kpi-sub">hanya matkul yang punya grade</div>
+						</div>
+						<div class="kpi">
+							<div class="kpi-label">Total SKS terhitung</div>
+							<div id="overallCredits" class="kpi-value">0</div>
+							<div class="kpi-sub">dipakai dalam hitung GPA</div>
+						</div>
+					</div>
+					<div class="helper">
+						Konversi default: A(≥85), A-(80), B+(75), B(70), B-(65), C+(60),
+						C(55), D(45), E(&lt;45).
+					</div>
+				</div>
+			</div>
+
+			<div class="card" style="margin-top: 12px">
+				<div class="semester-tabs" id="semesterTabs"></div>
+
+				<div
+					class="flex"
+					style="
+						justify-content: space-between;
+						align-items: center;
+						margin-bottom: 6px;
+					"
+				>
+					<div>
+						<div
+							id="semesterTitle"
+							style="font-weight: 600; font-size: 0.95rem"
+						>
+							Semester 1
+						</div>
+						<div id="semesterSub" class="small">
+							Isi daftar matkul dan nilai akhir semester ini.
+						</div>
+					</div>
+					<button id="addCourseBtn" class="btn btn-primary">
+						+ Tambah Matkul
+					</button>
+				</div>
+
+				<div style="overflow-x: auto">
+					<table>
+						<thead>
+							<tr>
+								<th>Kode</th>
+								<th>Nama Matkul</th>
+								<th>SKS</th>
+								<th>Nilai Akhir</th>
+								<th>Grade</th>
+								<th>Aksi</th>
+							</tr>
+						</thead>
+						<tbody id="courseTableBody">
+							<!-- rows via JS -->
+						</tbody>
+					</table>
+				</div>
+
+				<div
+					class="flex"
+					style="
+						justify-content: space-between;
+						align-items: center;
+						margin-top: 6px;
+					"
+				>
+					<div class="small">
+						<span>SKS semester: <strong id="semCredits">0</strong></span>
+						&nbsp;|&nbsp;
+						<span>GPS semester: <strong id="semGpa">0.00</strong></span>
+					</div>
+					<div class="flex" style="gap: 4px">
+						<button id="resetAllBtn" class="btn btn-danger">
+							Reset Semua Data
+						</button>
+					</div>
+				</div>
+
+				<div
+					id="componentsPanel"
+					class="components-panel"
+					style="margin-top: 10px; display: none"
+				>
+					<div class="components-header">
+						<div>
+							<div class="components-title" id="componentsTitle">
+								Detail Nilai Matkul
+							</div>
+							<div class="small" id="componentsSub">
+								Atur komponen (tugas/UTS/UAS/project), bobot, dan nilai.
+							</div>
+						</div>
+						<button id="addComponentBtn" class="btn btn-primary">
+							+ Komponen
+						</button>
+					</div>
+					<div style="overflow-x: auto">
+						<table>
+							<thead>
+								<tr>
+									<th>Komponen</th>
+									<th>Bobot (%)</th>
+									<th>Nilai (0–100)</th>
+									<th>Kontribusi</th>
+									<th></th>
+								</tr>
+							</thead>
+							<tbody id="componentsBody"></tbody>
+						</table>
+					</div>
+					<div class="helper" id="componentsSummary">
+						Total bobot: 0% • Nilai akhir: 0.00 (grade: -)
+					</div>
+				</div>
+			</div>
+		</div>
+		<script>
+			(function () {
+				const STORAGE_KEY = "study-plan-simple-v3";
+				const semestersCount = 8;
+
+				const defaultPlan = {
+					1: [
+						{
+							code: "CHAR6013001",
+							name: "Character Building: Pancasila",
+							sks: 2,
+							components: [
+								{ name: "THEORY: ASSIGNMENT", weight: 20 },
+								{ name: "THEORY: MID EXAM", weight: 30 },
+								{ name: "THEORY: FINAL PROJECT", weight: 50 },
+							],
+						},
+						{
+							code: "COMP6047001",
+							name: "Algorithm and Programming",
+							sks: 6,
+							components: [
+								{ name: "THEORY: ASSIGNMENT", weight: 7 },
+								{ name: "THEORY: FINAL EXAM", weight: 28 },
+								{ name: "LAB: FINAL REPORT", weight: 18 },
+								{ name: "LAB: QUIZ", weight: 12 },
+								{ name: "THEORY: MID EXAM", weight: 21 },
+								{ name: "THEORY: CASE STUDY AOL", weight: 14 },
+							],
+						},
+						{
+							code: "COMP6798001",
+							name: "Program Design Methods",
+							sks: 2,
+							components: [
+								{ name: "THEORY: FINAL EXAM", weight: 30 },
+								{ name: "THEORY: MID EXAM", weight: 20 },
+								{ name: "THEORY: GROUP PROJECT AOL", weight: 50 },
+							],
+						},
+						{
+							code: "LANG6027001",
+							name: "Indonesian",
+							sks: 2,
+							components: [
+								{ name: "THEORY: ASSIGNMENT", weight: 30 },
+								{ name: "THEORY: FINAL PROJECT", weight: 40 },
+								{ name: "THEORY: MID EXAM", weight: 30 },
+							],
+						},
+						{
+							code: "MATH6025001",
+							name: "Discrete Mathematics",
+							sks: 4,
+							components: [
+								{ name: "THEORY: ASSIGNMENT", weight: 25 },
+								{ name: "THEORY: FINAL EXAM", weight: 40 },
+								{ name: "THEORY: MID EXAM", weight: 35 },
+							],
+						},
+						{
+							code: "MATH6030001",
+							name: "Linear Algebra",
+							sks: 2,
+							components: [
+								{ name: "THEORY: ASSIGNMENT", weight: 25 },
+								{ name: "THEORY: FINAL EXAM", weight: 40 },
+								{ name: "THEORY: MID EXAM", weight: 35 },
+							],
+						},
+						{
+							code: "STAT6171001",
+							name: "Basic Statistics",
+							sks: 2,
+							components: [
+								{ name: "THEORY: ASSIGNMENT", weight: 30 },
+								{ name: "THEORY: FINAL EXAM", weight: 35 },
+								{ name: "THEORY: MID EXAM", weight: 35 },
+							],
+						},
+					],
+					2: [
+						{
+							code: "CHAR6014001",
+							name: "Character Building: Kewarganegaraan",
+							sks: 2,
+							components: [
+								{ name: "THEORY: ASSIGNMENT", weight: 20 },
+								{ name: "THEORY: MID EXAM", weight: 30 },
+								{ name: "THEORY: FINAL PROJECT", weight: 50 },
+							],
+						},
+						{
+							code: "COMP6048001",
+							name: "Data Structures",
+							sks: 6,
+							components: [
+								{ name: "THEORY: ASSIGNMENT", weight: 8 },
+								{ name: "THEORY: FINAL EXAM", weight: 35 },
+								{ name: "THEORY: MID EXAM", weight: 30 },
+								{ name: "LAB: QUIZ", weight: 12 },
+								{ name: "THEORY: CASE STUDY AOL", weight: 7 },
+								{ name: "LAB: ASSIGNMENT", weight: 8 },
+							],
+						},
+						{
+							code: "COMP6800001",
+							name: "Human and Computer Interaction",
+							sks: 3,
+							components: [
+								{ name: "THEORY: FINAL EXAM", weight: 30 },
+								{ name: "LAB: PROJECT", weight: 20 },
+								{ name: "THEORY: MID EXAM", weight: 20 },
+								{ name: "THEORY: GROUP PROJECT AOL", weight: 30 },
+							],
+						},
+						{
+							code: "ENPR6311001",
+							name: "Creativity and Innovation",
+							sks: 2,
+							components: [
+								{ name: "THEORY: ASSIGNMENT 1", weight: 30 },
+								{ name: "THEORY: ASSIGNMENT 2", weight: 30 },
+								{ name: "THEORY: FINAL PROJECT", weight: 40 },
+							],
+						},
+						{
+							code: "MATH6031001",
+							name: "Calculus",
+							sks: 4,
+							components: [
+								{ name: "THEORY: ASSIGNMENT", weight: 25 },
+								{ name: "THEORY: FINAL EXAM", weight: 40 },
+								{ name: "THEORY: MID EXAM", weight: 35 },
+							],
+						},
+						{
+							code: "MATH6183001",
+							name: "Scientific Computing",
+							sks: 3,
+							components: [
+								{ name: "THEORY: ASSIGNMENT", weight: 10 },
+								{ name: "THEORY: MID EXAM", weight: 20 },
+								{ name: "THEORY: FINAL EXAM", weight: 30 },
+								{ name: "LAB: ASSIGNMENT", weight: 30 },
+								{ name: "THEORY: CASE STUDY AOL", weight: 10 },
+							],
+						},
+					],
+					3: [
+						{
+							code: "CHAR6015001",
+							name: "Character Building: Agama",
+							sks: 2,
+							components: [
+								{ name: "THEORY: ASSIGNMENT", weight: 20 },
+								{ name: "THEORY: FINAL PROJECT", weight: 50 },
+								{ name: "THEORY: MID EXAM", weight: 30 },
+							],
+						},
+						{
+							code: "COMP6049001",
+							name: "Algorithm Design and Analysis",
+							sks: 4,
+							components: [
+								{ name: "THEORY: ASSIGNMENT", weight: 20 },
+								{ name: "THEORY: FINAL EXAM", weight: 30 },
+								{ name: "THEORY: MID EXAM", weight: 30 },
+								{ name: "THEORY: CASE STUDY AOL", weight: 20 },
+							],
+						},
+						{
+							code: "COMP6065001",
+							name: "Artificial Intelligence",
+							sks: 4,
+							components: [
+								{ name: "THEORY: MID EXAM", weight: 20 },
+								{ name: "THEORY: FINAL EXAM", weight: 30 },
+								{ name: "THEORY: GROUP PROJECT AOL", weight: 50 },
+							],
+						},
+						{
+							code: "COMP6799001",
+							name: "Database Technology",
+							sks: 3,
+							components: [
+								{ name: "THEORY: ASSIGNMENT", weight: 14 },
+								{ name: "THEORY: MID EXAM", weight: 21 },
+								{ name: "THEORY: FINAL EXAM", weight: 25 },
+								{ name: "LAB: ASSIGNMENT", weight: 12 },
+								{ name: "LAB: FINAL EXAM", weight: 18 },
+								{ name: "THEORY: GROUP PROJECT AOL", weight: 10 },
+							],
+						},
+						{
+							code: "COMP6820001",
+							name: "Object Oriented Programming",
+							sks: 2,
+							components: [
+								{ name: "THEORY: ASSIGNMENT", weight: 20 },
+								{ name: "THEORY: MID EXAM", weight: 30 },
+								{ name: "THEORY: FINAL EXAM", weight: 50 },
+							],
+						},
+						{
+							code: "CPEN6247001",
+							name: "Computer Networks",
+							sks: 3,
+							components: [
+								{ name: "THEORY: ASSIGNMENT", weight: 10 },
+								{ name: "THEORY: FINAL EXAM", weight: 25 },
+								{ name: "THEORY: MID EXAM", weight: 15 },
+								{ name: "LAB: ASSIGNMENT", weight: 35 },
+								{ name: "THEORY: CASE STUDY AOL", weight: 15 },
+							],
+						},
+						{
+							code: "SCIE6063001",
+							name: "Computational Physics",
+							sks: 3,
+							components: [
+								{ name: "THEORY: ASSIGNMENT", weight: 7 },
+								{ name: "THEORY: MID EXAM", weight: 28 },
+								{ name: "THEORY: FINAL EXAM", weight: 28 },
+								{ name: "THEORY: CASE STUDY AOL", weight: 7 },
+								{ name: "LAB: ASSIGNMENT", weight: 30 },
+							],
+						},
+					],
+					4: [],
+					5: [],
+					6: [],
+					7: [],
+					8: [],
+				};
+
+				const gradePoints = {
+					A: 4.0,
+					"A-": 3.67,
+					"B+": 3.33,
+					B: 3.0,
+					"B-": 2.5,
+					"C+": 2,
+					C: 1,
+					D: 1.0,
+					E: 0.0,
+				};
+
+				function numericToGrade(score) {
+					if (score == null || isNaN(score)) return "";
+					if (score >= 90) return "A";
+					if (score >= 85) return "A-";
+					if (score >= 80) return "B+";
+					if (score >= 75) return "B";
+					if (score >= 70) return "B-";
+					if (score >= 65) return "C+";
+					if (score >= 50) return "C";
+					if (score >= 0) return "D";
+					return "E";
+				}
+
+				let state = {
+					track: "",
+					entryYear: "",
+					activeSemester: 1,
+					nextCourseId: 1,
+					nextComponentId: 1,
+					semesters: {},
+				};
+
+				for (let s = 1; s <= semestersCount; s++) {
+					state.semesters[s] = [];
+				}
+
+				let currentDetailCourseId = null;
+
+				function saveState() {
+					try {
+						localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+					} catch (e) {
+						console.warn("Gagal simpan state", e);
+					}
+				}
+
+				function loadState() {
+					try {
+						const raw = localStorage.getItem(STORAGE_KEY);
+						if (!raw) {
+							state.track = "";
+							state.entryYear = "";
+							state.activeSemester = 1;
+							state.nextCourseId = 1;
+							state.nextComponentId = 1;
+							state.semesters = {};
+							for (let s = 1; s <= semestersCount; s++) {
+								const key = String(s);
+								const courses = defaultPlan[key] || [];
+								state.semesters[s] = courses.map((c) => {
+									const courseId = state.nextCourseId++;
+									return {
+										id: courseId,
+										code: c.code || "",
+										name: c.name || "",
+										sks: c.sks != null ? c.sks : null,
+										finalScore: null,
+										grade: "",
+										components: (c.components || []).map((comp) => ({
+											id: state.nextComponentId++,
+											name: comp.name || "",
+											weight: comp.weight != null ? comp.weight : null,
+											score: null,
+										})),
+									};
+								});
+							}
+							return;
+						}
+
+						const data = JSON.parse(raw);
+						if (!data || typeof data !== "object") return;
+
+						state.track = data.track || "";
+						state.entryYear = data.entryYear || "";
+						state.activeSemester = data.activeSemester || 1;
+						state.nextCourseId = data.nextCourseId || 1;
+						state.nextComponentId = data.nextComponentId || 1;
+						state.semesters = {};
+						for (let s = 1; s <= semestersCount; s++) {
+							const arr =
+								data.semesters && data.semesters[s] ? data.semesters[s] : [];
+							state.semesters[s] = arr.map((c) => ({
+								id: c.id,
+								code: c.code || "",
+								name: c.name || "",
+								sks: c.sks != null ? c.sks : null,
+								finalScore: c.finalScore != null ? c.finalScore : null,
+								grade: c.grade || "",
+								components: (c.components || []).map((comp) => ({
+									id: comp.id,
+									name: comp.name || "",
+									weight: comp.weight != null ? comp.weight : null,
+									score: comp.score != null ? comp.score : null,
+								})),
+							}));
+						}
+					} catch (e) {
+						console.warn("Gagal load state", e);
+					}
+				}
+
+				function findCourseById(id) {
+					for (let s = 1; s <= semestersCount; s++) {
+						const c = state.semesters[s].find((x) => x.id === id);
+						if (c) return c;
+					}
+					return null;
+				}
+
+				function recomputeAllCourses() {
+					for (let s = 1; s <= semestersCount; s++) {
+						for (const course of state.semesters[s]) {
+							const comps = course.components || [];
+							let totalWeight = 0;
+							let total = 0;
+							for (const comp of comps) {
+								const w = parseFloat(comp.weight);
+								const v = parseFloat(comp.score);
+								if (isNaN(w) || isNaN(v)) continue;
+								totalWeight += w;
+								total += (w / 100) * v;
+							}
+							const score = totalWeight > 0 ? total : null;
+							course.finalScore = score;
+							course.grade = score != null ? numericToGrade(score) : "";
+						}
+					}
+				}
+
+				function renderSemesterTabs() {
+					const tabContainer = document.getElementById("semesterTabs");
+					tabContainer.innerHTML = "";
+					for (let s = 1; s <= semestersCount; s++) {
+						const btn = document.createElement("button");
+						btn.type = "button";
+						btn.className =
+							"tab" + (s === state.activeSemester ? " active" : "");
+						btn.textContent = "S" + s;
+						btn.addEventListener("click", () => {
+							state.activeSemester = s;
+							currentDetailCourseId = null;
+							saveState();
+							render();
+						});
+						tabContainer.appendChild(btn);
+					}
+				}
+
+				function renderCoursesTable() {
+					const tbody = document.getElementById("courseTableBody");
+					tbody.innerHTML = "";
+					const sem = state.activeSemester;
+					const courses = state.semesters[sem] || [];
+
+					let creditsTotal = 0;
+					let semQuality = 0;
+					let semCreditsForGpa = 0;
+
+					if (courses.length === 0) {
+						const tr = document.createElement("tr");
+						const td = document.createElement("td");
+						td.colSpan = 6;
+						td.style.textAlign = "center";
+						td.style.color = "#6b7280";
+						td.style.padding = "8px";
+						td.textContent = "Belum ada matkul. Tambah dulu.";
+						tr.appendChild(td);
+						tbody.appendChild(tr);
+					} else {
+						for (const course of courses) {
+							const tr = document.createElement("tr");
+
+							const tdCode = document.createElement("td");
+							const inCode = document.createElement("input");
+							inCode.type = "text";
+							inCode.value = course.code || "";
+							inCode.placeholder = "Kode";
+							inCode.addEventListener("input", (e) => {
+								course.code = e.target.value;
+								saveState();
+							});
+							tdCode.appendChild(inCode);
+							tr.appendChild(tdCode);
+
+							const tdName = document.createElement("td");
+							const inName = document.createElement("input");
+							inName.type = "text";
+							inName.value = course.name || "";
+							inName.placeholder = "Nama matkul";
+							inName.addEventListener("input", (e) => {
+								course.name = e.target.value;
+								saveState();
+								renderComponentsPanel();
+							});
+							tdName.appendChild(inName);
+							tr.appendChild(tdName);
+
+							const tdSks = document.createElement("td");
+							const inSks = document.createElement("input");
+							inSks.type = "number";
+							inSks.min = "0";
+							inSks.step = "0.5";
+							inSks.className = "w-60";
+							inSks.value = course.sks != null ? course.sks : "";
+							inSks.addEventListener("change", (e) => {
+								const v = parseFloat(e.target.value);
+								course.sks = isNaN(v) ? null : v;
+								saveState();
+								render();
+							});
+							tdSks.appendChild(inSks);
+							tr.appendChild(tdSks);
+
+							const tdFinal = document.createElement("td");
+							const spanFinal = document.createElement("span");
+							if (course.finalScore != null && !isNaN(course.finalScore)) {
+								spanFinal.textContent = course.finalScore.toFixed(2);
+							} else {
+								spanFinal.textContent = "-";
+							}
+							tdFinal.appendChild(spanFinal);
+							tr.appendChild(tdFinal);
+
+							const tdGrade = document.createElement("td");
+							const spanGrade = document.createElement("span");
+							spanGrade.textContent = course.grade || "-";
+							tdGrade.appendChild(spanGrade);
+							tr.appendChild(tdGrade);
+
+							const tdAct = document.createElement("td");
+							const btnDetail = document.createElement("button");
+							btnDetail.type = "button";
+							btnDetail.className = "btn";
+							btnDetail.textContent = "Detail nilai";
+							btnDetail.addEventListener("click", () => {
+								currentDetailCourseId = course.id;
+								renderComponentsPanel();
+							});
+							const btnDel = document.createElement("button");
+							btnDel.type = "button";
+							btnDel.className = "btn btn-danger";
+							btnDel.textContent = "Hapus";
+							btnDel.addEventListener("click", () => {
+								const arr = state.semesters[sem];
+								const idx = arr.findIndex((c) => c.id === course.id);
+								if (idx !== -1) {
+									arr.splice(idx, 1);
+									if (currentDetailCourseId === course.id)
+										currentDetailCourseId = null;
+									saveState();
+									render();
+								}
+							});
+							tdAct.appendChild(btnDetail);
+							tdAct.appendChild(btnDel);
+							tr.appendChild(tdAct);
+
+							tbody.appendChild(tr);
+
+							if (
+								course.sks != null &&
+								course.grade &&
+								gradePoints[course.grade] != null
+							) {
+								creditsTotal += course.sks;
+								semCreditsForGpa += course.sks;
+								semQuality += course.sks * gradePoints[course.grade];
+							} else if (course.sks != null) {
+								creditsTotal += course.sks;
+							}
+						}
+					}
+
+					const semGpa =
+						semCreditsForGpa > 0 ? semQuality / semCreditsForGpa : 0;
+					document.getElementById("semCredits").textContent = creditsTotal
+						.toFixed(1)
+						.replace(".0", "");
+					document.getElementById("semGpa").textContent = semGpa.toFixed(2);
+				}
+
+				function renderComponentsPanel() {
+					const panel = document.getElementById("componentsPanel");
+					const body = document.getElementById("componentsBody");
+					const title = document.getElementById("componentsTitle");
+					const sub = document.getElementById("componentsSub");
+					const summary = document.getElementById("componentsSummary");
+
+					if (!currentDetailCourseId) {
+						panel.style.display = "none";
+						return;
+					}
+
+					const course = findCourseById(currentDetailCourseId);
+					if (!course) {
+						panel.style.display = "none";
+						currentDetailCourseId = null;
+						return;
+					}
+
+					panel.style.display = "block";
+					title.textContent =
+						(course.code ? course.code + " – " : "") +
+						(course.name || "Matkul tanpa nama");
+					sub.textContent =
+						"Komponen nilai untuk matkul ini (tugas, quiz, UTS, UAS, project, dll).";
+
+					body.innerHTML = "";
+					const comps = course.components || [];
+					let totalWeight = 0;
+					let totalScore = 0;
+
+					if (comps.length === 0) {
+						const tr = document.createElement("tr");
+						const td = document.createElement("td");
+						td.colSpan = 5;
+						td.style.padding = "6px 8px";
+						td.style.color = "#6b7280";
+						td.textContent =
+							"Belum ada komponen. Tambah komponen di kanan atas.";
+						tr.appendChild(td);
+						body.appendChild(tr);
+					} else {
+						for (const comp of comps) {
+							const tr = document.createElement("tr");
+
+							const tdName = document.createElement("td");
+							const inName = document.createElement("input");
+							inName.type = "text";
+							inName.value = comp.name || "";
+							inName.placeholder = "Tugas/Quiz/UTS/UAS/Project";
+							inName.addEventListener("input", (e) => {
+								comp.name = e.target.value;
+								saveState();
+							});
+							tdName.appendChild(inName);
+							tr.appendChild(tdName);
+
+							const tdWeight = document.createElement("td");
+							const inWeight = document.createElement("input");
+							inWeight.type = "number";
+							inWeight.min = "0";
+							inWeight.max = "100";
+							inWeight.step = "1";
+							inWeight.className = "w-60";
+							inWeight.value = comp.weight != null ? comp.weight : "";
+							inWeight.addEventListener("change", (e) => {
+								const v = parseFloat(e.target.value);
+								comp.weight = isNaN(v) ? null : v;
+								saveState();
+								render();
+							});
+							tdWeight.appendChild(inWeight);
+							tr.appendChild(tdWeight);
+
+							const tdScore = document.createElement("td");
+							const inScore = document.createElement("input");
+							inScore.type = "number";
+							inScore.min = "0";
+							inScore.max = "100";
+							inScore.step = "0.1";
+							inScore.className = "w-60";
+							inScore.value = comp.score != null ? comp.score : "";
+							inScore.addEventListener("change", (e) => {
+								const v = parseFloat(e.target.value);
+								comp.score = isNaN(v) ? null : v;
+								saveState();
+								render();
+							});
+							tdScore.appendChild(inScore);
+							tr.appendChild(tdScore);
+
+							const tdContrib = document.createElement("td");
+							let contribText = "-";
+							const w = parseFloat(comp.weight);
+							const sc = parseFloat(comp.score);
+							if (!isNaN(w) && !isNaN(sc)) {
+								const contrib = (w / 100) * sc;
+								contribText = contrib.toFixed(2);
+								totalWeight += w;
+								totalScore += contrib;
+							}
+							tdContrib.textContent = contribText;
+							tr.appendChild(tdContrib);
+
+							const tdDel = document.createElement("td");
+							const btnDel = document.createElement("button");
+							btnDel.type = "button";
+							btnDel.className = "btn btn-danger";
+							btnDel.textContent = "X";
+							btnDel.addEventListener("click", () => {
+								const arr = course.components || [];
+								const idx = arr.findIndex((c) => c.id === comp.id);
+								if (idx !== -1) {
+									arr.splice(idx, 1);
+									saveState();
+									render();
+								}
+							});
+							tdDel.appendChild(btnDel);
+							tr.appendChild(tdDel);
+
+							body.appendChild(tr);
+						}
+					}
+
+					const finalScore = totalWeight > 0 ? totalScore : null;
+					course.finalScore = finalScore;
+					course.grade = finalScore != null ? numericToGrade(finalScore) : "";
+					saveState();
+
+					const grade = course.grade || "-";
+					summary.textContent =
+						"Total bobot: " +
+						totalWeight.toFixed(1) +
+						"% • Nilai akhir: " +
+						(finalScore != null ? finalScore.toFixed(2) : "0.00") +
+						" (grade: " +
+						grade +
+						")";
+
+					renderCoursesTable();
+					recalcOverallGpa();
+				}
+
+				function recalcOverallGpa() {
+					let totalCredits = 0;
+					let totalQuality = 0;
+
+					for (let s = 1; s <= semestersCount; s++) {
+						const courses = state.semesters[s] || [];
+						for (const course of courses) {
+							const sks = parseFloat(course.sks);
+							if (isNaN(sks) || !course.grade) continue;
+							const gp = gradePoints[course.grade];
+							if (gp == null) continue;
+							totalCredits += sks;
+							totalQuality += sks * gp;
+						}
+					}
+
+					const gpa = totalCredits > 0 ? totalQuality / totalCredits : 0;
+					document.getElementById("overallCredits").textContent = totalCredits
+						.toFixed(1)
+						.replace(".0", "");
+					document.getElementById("overallGpa").textContent = gpa.toFixed(2);
+				}
+
+				function renderHeaderFields() {
+					document.getElementById("track").value = state.track || "";
+					document.getElementById("entryYear").value = state.entryYear || "";
+					document.getElementById("semesterTitle").textContent =
+						"Semester " + state.activeSemester;
+
+					const sub = document.getElementById("semesterSub");
+					if (state.activeSemester === 6 || state.activeSemester === 7) {
+						sub.textContent =
+							"Biasanya untuk enrichment/OE. Tetap bisa kamu isi matkul atau aktivitas yang dinilai.";
+					} else if (state.activeSemester === 8) {
+						sub.textContent =
+							"Biasanya untuk Thesis/Capstone. Tambah matkul/komponen sendiri.";
+					} else {
+						sub.textContent =
+							"Isi daftar matkul reguler dan komponen nilainya.";
+					}
+				}
+
+				function render() {
+					recomputeAllCourses();
+					renderHeaderFields();
+					renderSemesterTabs();
+					renderCoursesTable();
+					renderComponentsPanel();
+					recalcOverallGpa();
+				}
+
+				function addCourse(semester) {
+					const course = {
+						id: state.nextCourseId++,
+						code: "",
+						name: "",
+						sks: null,
+						finalScore: null,
+						grade: "",
+						components: [],
+					};
+					state.semesters[semester].push(course);
+					saveState();
+					currentDetailCourseId = course.id;
+					render();
+				}
+
+				function addComponentToCurrentCourse() {
+					if (!currentDetailCourseId) return;
+					const course = findCourseById(currentDetailCourseId);
+					if (!course) return;
+					if (!course.components) course.components = [];
+
+					course.components.push({
+						id: state.nextComponentId++,
+						name: "",
+						weight: null,
+						score: null,
+					});
+					saveState();
+					renderComponentsPanel();
+				}
+
+				function resetAll() {
+					if (
+						!confirm(
+							"Hapus semua matkul, komponen, dan setting yang tersimpan di browser?"
+						)
+					)
+						return;
+					localStorage.removeItem(STORAGE_KEY);
+					state = {
+						track: "",
+						entryYear: "",
+						activeSemester: 1,
+						nextCourseId: 1,
+						nextComponentId: 1,
+						semesters: {},
+					};
+					for (let s = 1; s <= semestersCount; s++) {
+						state.semesters[s] = [];
+					}
+					currentDetailCourseId = null;
+					loadState();
+					render();
+				}
+
+				function attachEvents() {
+					document.getElementById("track").addEventListener("change", (e) => {
+						state.track = e.target.value;
+						saveState();
+					});
+
+					document
+						.getElementById("entryYear")
+						.addEventListener("input", (e) => {
+							state.entryYear = e.target.value;
+							saveState();
+						});
+
+					document
+						.getElementById("addCourseBtn")
+						.addEventListener("click", () => {
+							addCourse(state.activeSemester);
+						});
+
+					document
+						.getElementById("addComponentBtn")
+						.addEventListener("click", () => {
+							addComponentToCurrentCourse();
+						});
+
+					document
+						.getElementById("resetAllBtn")
+						.addEventListener("click", resetAll);
+				}
+
+				loadState();
+				attachEvents();
+				render();
+			})();
+		</script>
+	</body>
+</html>
