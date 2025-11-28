@@ -181,6 +181,7 @@
 				color: var(--muted);
 				font-size: 0.8rem;
 				cursor: pointer;
+				white-space: nowrap;
 			}
 
 			.tab.active {
@@ -282,18 +283,120 @@
 				width: 60px;
 			}
 
+			/* ---------- RESPONSIVE ---------- */
+
 			@media (max-width: 960px) {
+				body {
+					padding: 12px;
+				}
+
 				.row {
 					grid-template-columns: minmax(0, 1fr);
+					gap: 10px;
 				}
+
 				.header-grid {
 					grid-template-columns: repeat(2, minmax(0, 1fr));
 				}
 			}
 
 			@media (max-width: 640px) {
+				body {
+					padding: 10px;
+				}
+
+				h1 {
+					font-size: 1.2rem;
+				}
+
+				p {
+					font-size: 0.8rem;
+				}
+
+				.card {
+					padding: 10px 10px;
+				}
+
 				.header-grid {
 					grid-template-columns: minmax(0, 1fr);
+					row-gap: 8px;
+				}
+
+				input[type="text"],
+				input[type="number"],
+				select {
+					padding: 8px 10px;
+					font-size: 0.9rem;
+				}
+
+				.btn {
+					padding: 6px 10px;
+					font-size: 0.8rem;
+				}
+
+				.kpi-grid {
+					grid-template-columns: minmax(0, 1fr);
+				}
+
+				.semester-tabs {
+					flex-wrap: nowrap;
+					overflow-x: auto;
+					padding-bottom: 4px;
+					margin-bottom: 6px;
+				}
+
+				.semester-tabs::-webkit-scrollbar {
+					height: 4px;
+				}
+
+				.semester-tabs::-webkit-scrollbar-track {
+					background: transparent;
+				}
+
+				.semester-tabs::-webkit-scrollbar-thumb {
+					background: #111827;
+					border-radius: 999px;
+				}
+
+				th,
+				td {
+					padding: 6px 6px;
+					font-size: 0.75rem;
+				}
+
+				table {
+					font-size: 0.75rem;
+				}
+
+				/* header title + tombol tambah matkul jadi stack */
+				.card > .flex {
+					align-items: flex-start;
+				}
+
+				.card > .flex > button,
+				.card > .flex .btn-primary {
+					margin-top: 4px;
+				}
+
+				/* bar bawah: tombol export/import/reset wrap rapi */
+				.card .flex:last-child {
+					flex-wrap: wrap;
+					align-items: flex-start;
+				}
+
+				.card .flex:last-child > .flex {
+					width: 100%;
+					justify-content: flex-start;
+				}
+
+				.components-header {
+					flex-direction: column;
+					align-items: flex-start;
+					gap: 6px;
+				}
+
+				.components-header .btn {
+					align-self: flex-start;
 				}
 			}
 		</style>
@@ -383,9 +486,9 @@
 							<div class="kpi-sub">dipakai dalam hitung GPA</div>
 						</div>
 					</div>
-					<div class="helper">
-						Konversi default: A(≥85), A-(80), B+(75), B(70), B-(65), C+(60),
-						C(55), D(45), E(&lt;45).
+					<div id="perSemesterGpa" class="helper">
+						GPA per semester: S1: - | S2: - | S3: - | S4: - | S5: - | S6: - |
+						S7: - | S8: -
 					</div>
 				</div>
 			</div>
@@ -1490,16 +1593,28 @@
 					let totalCredits = 0;
 					let totalQuality = 0;
 
+					const perSemester = [];
+
 					for (let s = 1; s <= semestersCount; s++) {
 						const courses = state.semesters[s] || [];
+						let semCredits = 0;
+						let semQuality = 0;
+
 						for (const course of courses) {
 							const sks = parseFloat(course.sks);
 							if (isNaN(sks) || !course.grade) continue;
 							const gp = gradePoints[course.grade];
 							if (gp == null) continue;
+
+							semCredits += sks;
+							semQuality += sks * gp;
+
 							totalCredits += sks;
 							totalQuality += sks * gp;
 						}
+
+						const semGpa = semCredits > 0 ? semQuality / semCredits : null;
+						perSemester.push(semGpa);
 					}
 
 					const gpa = totalCredits > 0 ? totalQuality / totalCredits : 0;
@@ -1507,6 +1622,18 @@
 						.toFixed(1)
 						.replace(".0", "");
 					document.getElementById("overallGpa").textContent = gpa.toFixed(2);
+
+					const perEl = document.getElementById("perSemesterGpa");
+					if (perEl) {
+						const parts = [];
+						for (let i = 0; i < semestersCount; i++) {
+							const val = perSemester[i];
+							parts.push(
+								"S" + (i + 1) + ": " + (val != null ? val.toFixed(2) : "-")
+							);
+						}
+						perEl.textContent = "GPA per semester: " + parts.join("  |  ");
+					}
 				}
 
 				function renderHeaderFields() {
